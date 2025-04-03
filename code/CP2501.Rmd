@@ -1,0 +1,76 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(readr)
+library(stringr)
+library(ggplot2)
+
+
+# read in the fieldbook template file
+FBF_25 <- read_csv("CP2501_fieldbook_file.csv")
+
+map.file <- FBF_25
+
+```
+
+### Fieldbook file
+```{r}
+print(FBF_25)
+```
+
+```{r, echo=FALSE, fig.width=4, fig.height= 7}
+library(RColorBrewer)
+
+acc.map <- 
+  ggplot(FBF_25, aes(x = range, y = row)) +
+  geom_tile(aes(fill = as.factor(block)), color = "black") +  
+  geom_text(aes(label = accession_name), size = 2, color = "black") +  
+  scale_fill_brewer(palette = "Dark2", name = "Block") +  
+  scale_y_reverse(breaks = unique(FBF_25$row)) +  # Flip y-axis and show all row labels
+  scale_x_continuous(breaks = unique(FBF_25$range)) +  # Ensure all range labels are shown
+  theme_classic() +
+  labs(
+    title = "Field Map: CP2501",
+    x = "Range",
+    y = "Row"
+  ) +
+  theme(legend.position = "bottom")  # Place the legend at the bottom
+
+plot.map <- 
+  ggplot(FBF_25, aes(x = range, y = row)) +
+  geom_tile(aes(fill = as.factor(block)), color = "black") +  
+  geom_text(aes(label = plot), size = 2, color = "black") +  
+  scale_fill_brewer(palette = "Dark2", name = "Block") +  
+  scale_y_reverse(breaks = unique(FBF_25$row)) +  # Flip y-axis and show all row labels
+  scale_x_continuous(breaks = unique(FBF_25$range)) +  # Ensure all range labels are shown
+  theme_classic() +
+  labs(
+    title = "Field Map: CP2501",
+    x = "Range",
+    y = "Row"
+  ) +
+  theme(
+    legend.position = "bottom")  
+
+```
+
+### Geno map
+```{r,echo=FALSE}
+plot(acc.map)
+
+# ggsave("CP2501_HT2501_geno_map.png", plot = acc.map, width = 10, height = 6, dpi = 300, units = "in")
+```
+
+### Plot map
+```{r,echo=FALSE}
+plot(plot.map)
+
+# ggsave("CP2501_HT2501_plot_map.png", plot = plot.map, width = 10, height = 6, dpi = 300, units = "in")
+```
