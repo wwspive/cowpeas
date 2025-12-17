@@ -1,0 +1,104 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(readr)
+library(stringr)
+library(ggplot2)
+
+
+# read in the fieldbook template file
+FBF <- read_csv("~/Documents/GitHub/ButterBeanDatabase/docs/template_FB_file.csv")
+
+
+
+map.file <- FBF
+
+```
+
+### Fieldbook file
+```{r}
+print(FBF)
+```
+
+```{r, echo=FALSE, fig.width=4, fig.height= 7}
+library(RColorBrewer)
+
+acc.map <- 
+  ggplot(FBF, aes(x = range, y = row)) +
+  geom_tile(aes(fill = as.factor(block)), color = "black") +  
+  geom_text(aes(label = accession_name), size = 2, color = "black") +  
+  scale_fill_brewer(palette = "Dark2", name = "Block") +  
+  scale_y_reverse(breaks = unique(FBF$row)) +  # Flip y-axis and show all row labels
+  scale_x_continuous(breaks = unique(FBF$range)) +  # Ensure all range labels are shown
+  theme_classic() +
+  labs(
+    title = "Field Map: BBXXXX",
+    x = "Range",
+    y = "Row"
+  ) +
+  theme(legend.position = "bottom")  # Place the legend at the bottom
+
+plot.map <- 
+  ggplot(FBF, aes(x = range, y = row)) +
+  geom_tile(aes(fill = as.factor(block)), color = "black") +  
+  geom_text(aes(label = plot_number), size = 2, color = "black") +  
+  scale_fill_brewer(palette = "Dark2", name = "Block") +  
+  scale_y_reverse(breaks = unique(FBF$row)) +  # Flip y-axis and show all row labels
+  scale_x_continuous(breaks = unique(FBF$range)) +  # Ensure all range labels are shown
+  theme_classic() +
+  labs(
+    title = "Field Map: BBXXXX",
+    x = "Range",
+    y = "Row"
+  ) +
+  theme(
+    legend.position = "bottom")  
+
+
+unique_id.map <- 
+  ggplot(FBF, aes(x = range, y = row)) +
+  geom_tile(aes(fill = as.factor(block)), color = "black") +  
+  geom_text(aes(label = unique_id), size = 2, color = "black") +  
+  scale_fill_brewer(palette = "Dark2", name = "Block") +  
+  scale_y_reverse(breaks = unique(FBF$row)) +  # Flip y-axis and show all row labels
+  scale_x_continuous(breaks = unique(FBF$range)) +  # Ensure all range labels are shown
+  theme_classic() +
+  labs(
+    title = "Field Map: BBXXXX",
+    x = "Range",
+    y = "Row"
+  ) +
+  theme(
+    legend.position = "bottom")
+
+```
+
+### Geno map
+```{r,echo=FALSE}
+plot(acc.map)
+
+# ggsave("BBXXXX_geno_map.png", plot = acc.map, width = 10, height = 6, dpi = 300, units = "in")
+```
+
+### Plot map
+```{r,echo=FALSE}
+plot(plot.map)
+
+# ggsave("BBXXXX_plot_map.png", plot = plot.map, width = 10, height = 6, dpi = 300, units = "in")
+```
+
+###Unique_id map
+```{r}
+plot(unique_id.map)
+
+# ggsave("BBXXXX_unique_id_map.png", plot = unique_id.map, width = 10, height = 6, dpi = 300, units = "in")
+```
+
+

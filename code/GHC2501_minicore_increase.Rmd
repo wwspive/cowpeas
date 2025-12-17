@@ -1,0 +1,59 @@
+---
+title: "GHC2501_minicore_increase"
+output: html_document
+---
+
+```{r}
+# load libraries 
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(readr)
+library(stringr)
+library(ggplot2)
+
+# read in the inventory file 
+CP_inv <- read_csv("data/cowpea_inventory_12.15.25.csv") %>% 
+  filter(!is.na(minicore_id)) %>% #filter out everything but the minicore 
+  mutate(population)
+
+# read in the template_FB_file
+template_FB_file <- read_csv("docs/template_FB_file.csv") 
+
+# colnames(template_FB_file)
+```
+
+Create the GHC2501 FBF
+```{r}
+GHC2501_FBF <- CP_inv %>% 
+  arrange(desc(short_day)) %>%   # short_day == 1 goes first
+  mutate(experiment = "GHC2501",
+         plot_number = str_pad(101:464, width = 3, pad = "0"),
+         plot_name = paste(experiment, plot_number, sep = "_"),
+         block = case_when(
+           short_day == 1 ~ "1",
+           TRUE ~ NA_character_),
+         range = NA,
+         row = NA,
+         sort = c(1:364)) %>% 
+  select(experiment,
+         plot_name,
+         accession_name,
+         common_name,
+         minicore_id,
+         plot_number, 
+         range,
+         row,
+         block,
+         population_name,
+         seedlot_name,
+         sort)
+
+# write out the fbf
+write.csv(GHC2501_FBF, "data/GHC2501_UCRminicore_increase/GHC2501_FBF.csv",row.names = FALSE, na = "")
+
+# write out the file 
+# write.csv(list_to_plant, "output/GH2501_list_to_plant.csv", row.names = FALSE, na = "")
+```
+
