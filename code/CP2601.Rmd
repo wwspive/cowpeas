@@ -146,6 +146,4 @@ plot(plot.map)
 plot(unique_id.map)
 
 # ggsave("~/Documents/GitHub/cowpeas/data/CP2601/CP2601_unique_id_map.png", plot = unique_id.map, width = 9, height = 6, dpi = 300, units = "in")
-```
-```
 
