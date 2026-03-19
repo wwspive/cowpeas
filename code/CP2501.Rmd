@@ -102,3 +102,86 @@ plot(unique_id.map)
 ```
 
 
+ANALYSIS
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)   
+library(emmeans)
+library(agricolae)
+library(multcomp)
+
+# read in the data file 
+CP2501_data <- read_csv("data/CP2501_cucurlio_trial/CP2501_data.csv") %>% 
+  mutate(
+    block = as.factor(block),
+    accession_name = as.factor(accession_name),
+    per_punctured = (num_punctured_seeds / num_seed_10_pods)*100
+  )
+
+# Calculate BLUEs (Genotype as fixed effect)
+punct_seed_blue <- lmer(per_punctured ~ accession_name + (1 | block), data = CP2501_data, REML = FALSE)
+
+anova(punct_seed_blue)
+
+# Extracting BLUEs:
+emm_acc <- emmeans(punct_seed_blue, ~ accession_name)
+summary(emm_acc)
+
+pairs(emm_acc)
+cld(emm_acc, Letters = letters)
+
+blue_table <- as.data.frame(cld(emm_acc, Letters = letters))
+```
+
+```{r}
+# Evaluate the model
+plot(punct_seed_blue)
+qqnorm(residuals(punct_seed_blue))
+qqline(residuals(punct_seed_blue))
+```
+
+
+```{r}
+blue_plot <- blue_table %>%
+  as.data.frame() %>%
+  arrange(emmean)
+
+
+ggplot(blue_plot,
+       aes(x = reorder(accession_name, emmean),
+           y = emmean)) +
+  geom_col(color = "black", width = 0.7) +
+  geom_errorbar(aes(ymin = emmean - SE,
+                    ymax = emmean + SE),
+                width = 0.2) +
+geom_text(aes(label = .group,
+              y = emmean + SE + 0.1 * max(emmean)),
+          size = 3) +
+  expand_limits(
+  y = max(blue_plot$emmean + blue_plot$SE) +
+      0.15 * max(blue_plot$emmean)) +
+  labs(
+    x = "Variety",
+    y = "Percentage of Punctured Seeds",
+    fill = NULL
+  ) +
+  theme_classic(base_size = 10) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, color = "black"),
+    axis.text.y = element_text(color = "black"),
+    legend.position = ""
+  )
+
+ggsave(
+  filename = "percent_punct_seed_BLUEs.png",  # output file name
+  plot = last_plot(),                     # or specify your plot object
+  path = "~/Documents/GitHub/cowpeas/data/CP2501_cucurlio_trial",
+  width = 8,                              # width in inches
+  height = 6,                             # height in inches
+  dpi = 600                               # high resolution for publication
+)
+
+```
+
+
