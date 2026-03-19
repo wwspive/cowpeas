@@ -51,7 +51,7 @@ GHC2501_FBF <- CP_inv %>%
          sort)
 
 # write out the fbf
-write.csv(GHC2501_FBF, "data/GHC2501_UCRminicore_increase/GHC2501_FBF.csv",row.names = FALSE, na = "")
+# write.csv(GHC2501_FBF, "data/GHC2501_UCRminicore_increase/GHC2501_FBF.csv",row.names = FALSE, na = "")
 
 # write out the file 
 # write.csv(list_to_plant, "output/GH2501_list_to_plant.csv", row.names = FALSE, na = "")
