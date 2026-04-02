@@ -72,6 +72,16 @@ CP2601_FBF <- rcbd_design %>%
 
 ```
 
+add seedlots to the FBF 
+```{r}
+# read in the field book file 
+CP2601_FBF <- read_csv("data/CP2601/CP2601_FBF.csv")
+
+# read in the inventory 
+cowpea_inventory_03_30_2026 <- read_csv("data/cowpea_inventory_03.30.2026.csv") %>% 
+  filter(accession_name %in% CP2601_FBF$accession_name)
+```
+
 
 ```{r, echo=FALSE, fig.width=4, fig.height= 7}
 
@@ -102,8 +112,8 @@ plot.map <-
   theme_classic() +
   labs(
     title = "Field Map: CP2501",
-    x = "Range",
-    y = "Row"
+    x = "Row",
+    y = "Range"
   ) +
   theme(
     legend.position = "bottom")  
@@ -119,8 +129,8 @@ unique_id.map <-
   theme_classic() +
   labs(
     title = "Field Map: CP2601",
-    x = "Range",
-    y = "Row"
+    x = "Row",
+    y = "Range"
   ) +
   theme(
     legend.position = "bottom")

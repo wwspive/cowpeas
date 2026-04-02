@@ -79,8 +79,8 @@ trt.map <-
   theme_classic() +
   labs(
     title = "Field Map: CP2602",
-    x = "Range",
-    y = "Row"
+    x = "Row",
+    y = "Range"
   ) +
   theme(legend.position = "bottom")  # Place the legend at the bottom
 
@@ -94,8 +94,8 @@ plot.map <-
   theme_classic() +
   labs(
     title = "Field Map: CP2602",
-    x = "Range",
-    y = "Row"
+    x = "Row",
+    y = "Range"
   ) +
   theme(legend.position = "bottom",
         axis.text = element_text(size = 10, color = "Black"))  # Place the legend at the bottom
@@ -115,5 +115,5 @@ plot(trt.map)
 ```{r,echo=FALSE}
 plot(plot.map)
 
-ggsave("~/Documents/GitHub/cowpeas/data/CP2602_plinazolin_evaluation/CP2602_plot_map.png", plot = plot.map, width = 9, height = 6, dpi = 300, units = "in")
+# ggsave("~/Documents/GitHub/cowpeas/data/CP2602_plinazolin_evaluation/CP2602_plot_map.png", plot = plot.map, width = 9, height = 6, dpi = 300, units = "in")
 ```
