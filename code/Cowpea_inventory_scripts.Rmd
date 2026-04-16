@@ -1,0 +1,77 @@
+---
+title: "Cowpea_inventory_scripts"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This Markdown Document is meant to keep track of how the inventory is being updated. 
+
+```{r}
+# load packages
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(readr)
+```
+
+remove the seed that was used for planting the GCP2601 trial
+```{r}
+# read in the existing inventory file
+CP_inv <- read_csv("data/cowpea_inventory_03.30.2026.csv")
+
+# read in the trial data file 
+GHC2501_FBF_data <- read_csv("data/GHC2501_UCRminicore_increase/GHC2501_FBF_data.csv")
+
+planted <- GHC2501_FBF_data %>% 
+  select(seedlot_name,
+         amount_planted)
+
+flt_inv <- CP_inv %>% 
+  filter(seedlot_name %in% GHC2501_FBF_data$seedlot_name)
+
+flt_inv <- flt_inv %>% 
+  left_join(planted , by = "seedlot_name") %>% 
+  mutate(amount = (amount - amount_planted)) %>% 
+  select(- amount_planted)
+
+CP_inv_updated <- CP_inv %>% 
+  filter(!seedlot_name %in% flt_inv$seedlot_name) %>% 
+  bind_rows(flt_inv)
+
+# write out the updated inventory file 
+# write.csv(CP_inv_updated, "data/cowpea_inventory_2026.04.15.csv", row.names = FALSE, na = "")
+
+```
+
+
+```{r}
+# read in the existing inventory file
+CP_inv <- read_csv("data/cowpea_inventory_2026.04.15.csv")
+
+# read in the inventory file from the GRIN accessions
+# make the seedlot_name
+GRIN_acc <- read_csv("data/GRIN_cowpea_accessions_20260414.csv") %>% 
+  mutate(
+    seedlot_name = paste(
+      population_name,
+      gsub(" ", "", accession_name),
+      year,
+      sep = "_"),
+    operator_name = "W.Spivey",
+    box_name = NA) 
+
+# create the updated inventory file
+CP_inv_updated <-  CP_inv %>% 
+                          bind_rows(GRIN_acc)
+
+# write out the updated inventory file 
+# write.csv(CP_inv_updated, "data/cowpea_inventory_2026.04.15.csv", row.names = FALSE, na = "")
+```
+
+
+
+

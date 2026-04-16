@@ -30,10 +30,8 @@ blocks <- 1:4
 
 # Generate RCBD
 rcbd_design <- lapply(blocks, function(b) {
-  
   # Randomize accessions within block
   randomized <- sample(accessions)
-  
   data.frame(
     range = b,
     plot = b * 100 + 1:15,
@@ -51,7 +49,7 @@ print(rcbd_design)
 ```{r}
 CP2601_FBF <- rcbd_design %>% 
   mutate(experiment = "CP2601",
-         location = "PDREC-F20",
+         location = "PDREC-F18",
          plot_name = paste(experiment, plot, sep = "_"),
          block = range,
          sort = c(1:60)) %>% 
@@ -67,25 +65,22 @@ CP2601_FBF <- rcbd_design %>%
          row,
          sort)
 
+# Read in the file with the seedlots to use
+SL_to_use <- read_csv("data/CP2601/2026_SL_to_use.csv") %>% 
+  rename(seedlot_name = SL)
+
+CP2601_FBF_final <- CP2601_FBF %>% 
+  left_join(SL_to_use, by = "accession_name") 
+
 # Write out the file
-# write.csv(CP2601_FBF, "data/Cp2601/CP2601_FBF.csv",row.names = FALSE, na = "")
+# write.csv(CP2601_FBF_final, "data/CP2601/CP2601_FBF.csv",row.names = FALSE, na = "")
 
-```
-
-add seedlots to the FBF 
-```{r}
-# read in the field book file 
-CP2601_FBF <- read_csv("data/CP2601/CP2601_FBF.csv")
-
-# read in the inventory 
-cowpea_inventory_03_30_2026 <- read_csv("data/cowpea_inventory_03.30.2026.csv") %>% 
-  filter(accession_name %in% CP2601_FBF$accession_name)
 ```
 
 
 ```{r, echo=FALSE, fig.width=4, fig.height= 7}
 
-FBF <- CP2601_FBF
+FBF <- CP2601_FBF_final
 
 acc.map <- 
   ggplot(FBF, aes(x = row, y = range)) +

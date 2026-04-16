@@ -1,4 +1,4 @@
-seedlot_name,population_name,accession_name,common_name,minicore_id,short_day,DNA_id,year,amount,weight(g),operator_name,description,box_name,quality,source
+seedlot_name,population_name,accession_name,common_name,minicore_id,short_day,DNA_id,year,amount,weight_gram,operator_name,description,box_name,quality,source
 HarrisSeed_CowpeaPhenomenal_2025,commercial,Cowpea Phenomenal,Cowpea Phenomenal,NA,,,2025,1061,226,W.Spivey,,,,Harris Seed
 Hoss_DixieLeePea_2024,commercial,Dixie Lee Pea,Dixie Lee Pea,NA,,,2024,200,,W.Spivey,,,,Hoss
 Hoss_MississippiPurplehullPea_2024,commercial,Mississippi Purplehull Pea,Mississippi Purplehull Pea,NA,,,2024,200,,W.Spivey,,,,Hoss
