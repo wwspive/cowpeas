@@ -13,7 +13,6 @@ library(readr)
 library(stringr)
 library(ggplot2)
 library(RColorBrewer)
-
 ```
 
 ```{r}
@@ -74,6 +73,23 @@ CP2601_FBF_final <- CP2601_FBF %>%
 
 # Write out the file
 # write.csv(CP2601_FBF_final, "data/CP2601/CP2601_FBF.csv",row.names = FALSE, na = "")
+
+```
+
+Update the FBF to the correct seedlot 
+```{r}
+CP2601_FBF <- read_csv("data/CP2601/CP2601_FBF.csv") %>% 
+  select(- seedlot_name)
+
+# Read in the file with the seedlots to use
+SL_to_use <- read_csv("data/CP2601/2026_SL_to_use.csv") %>% 
+  rename(seedlot_name = SL)
+
+CP2601_FBF_final2 <- CP2601_FBF %>% 
+  left_join(SL_to_use, by = "accession_name") 
+
+# Write out the file
+# write.csv(CP2601_FBF_final2, "data/CP2601/CP2601_FBF.csv",row.names = FALSE, na = "")
 
 ```
 

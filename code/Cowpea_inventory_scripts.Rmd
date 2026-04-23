@@ -72,6 +72,28 @@ CP_inv_updated <-  CP_inv %>%
 # write.csv(CP_inv_updated, "data/cowpea_inventory_2026.04.15.csv", row.names = FALSE, na = "")
 ```
 
+update the inventory to reflect that more seed from SESE was ordered. 
+```{r}
+# read in the CP inventory file
+cowpea_inventory_2026_04_15 <- read_csv("data/inventory_files/cowpea_inventory_2026.04.15.csv")
 
+# read in the new inventory
+new_inv <- read_csv("data/inventory_files/cowpea_commercial_seed_SESE_20260423.csv")
 
+# remove the old values 
+CP_INV <- cowpea_inventory_2026_04_15 %>% 
+  filter(! seedlot_name %in% new_inv$seedlot_name)
+
+# add the new values back
+CP_INV2 <- bind_rows(CP_INV, new_inv)
+
+CP_INV2 <- CP_INV2 %>% 
+  arrange(desc(population_name), accession_name)
+
+# write out the updated inventory file 
+# write.csv(CP_INV2, "data/inventory_files/cowpea_inventory_2026.04.23.csv", row.names = FALSE, na = "")
+
+```
+
+the seed used in CP2601 was manually subtracted from the inventory. 
 
