@@ -1,0 +1,213 @@
+---
+title: "CP2602_cowpea_diversity"
+output: html_document
+---
+
+
+```{r}
+# load libraries 
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(readr)
+library(stringr)
+library(ggplot2)
+library(RColorBrewer)
+```
+
+Selecting accessions by removing photoperiod lines 
+```{r}
+# read in the list of accessions that have harvest from GCP2501, the GRIN lines, and the commercial lines. 
+ALL_acc <- read_csv("data/CP2602_cowpea_diversity/ALL_acc.csv")
+
+# make a list of the accessions with less than 13 seed to be removed. selectively keep the 4 plots listed to make a full list of 242 accessions.  these were selected based on seed availability 
+RM <- ALL_acc %>% 
+  filter(
+    str_detect(plot_name, "GHC") & `seed count` < 13) %>% 
+  select(plot_number) %>% 
+  filter(!plot_number %in% c(145, 156, 363, 364)) #keep 145, 156, 363, 364
+  
+# file containing information about photoperiodism 
+Sources_UCR_minicore <- read_csv("data/inventory_files/Sources.UCR_minicore.csv")
+
+# list of accessions that can be used for planting. includes all 39 GRIN lines, 4 commercial lines, and the rest are from seed increase in GCP2501
+acc <- ALL_acc %>% 
+  left_join(Sources_UCR_minicore, by = "accession_name") %>% 
+  filter(
+    is.na(`Short Day`),
+    !(str_detect(seedlot_name, "GHC") & `seed count` < 13) ,
+    !(plot_number %in% RM$plot_number)) %>% 
+  select(- Seedlot,
+         - AKA,
+         - `Short Day`)
+
+# Write out the final list of accessions. 
+# write.csv(acc, "~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/CP2602_finalacc_list.csv", row.names = F)
+
+```
+
+Code for making experimental design layout
+```{r}
+# read in the accessions
+CP_hvst <- read_csv("data/CP2602_cowpea_diversity/CP2602_finalacc_list.csv")
+
+accessions <- CP_hvst %>% 
+  pull(accession_name)
+
+### Checks
+#1. Coronet Pinkeye Purplehull
+#2. Top Pick Pinkeye Pea
+#3. Dixie Lee Pea
+
+
+checks <- c("Check1", "Check2", "Check3")
+n_checks <- length(checks)
+
+sz_blocks <- 22 # 25 plots per range including 3 checks (25 - 3 = 22)
+
+test_accessions <- length(accessions)
+
+num_of_blocks <- test_accessions/sz_blocks
+ # = 11 blocks 
+               # (num_of_blocks * sz_blocks) - test_accessions
+fill_required = (11 * 22) - 242
+
+# = 0
+
+lines_filled<- c(accessions, rep(x = "fill", times = fill_required ))
+
+
+outdesign_dau <- agricolae::design.dau(
+  trt1 = checks, # checks
+  trt2 = lines_filled, # experimental
+  r = 11,
+  serie = 2,
+  seed = 203,
+  kinds = "Super-Duper",
+  randomization = TRUE)
+
+
+# Extract field book
+
+book <- outdesign_dau$book
+by(book,book[2],function(x) paste(x[,1],"-",as.character(x[,3])))
+
+# write.table(book,"~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/2026_CP2602_DoE.txt", row.names=FALSE, sep="\t")
+```
+
+
+```{r CP2602_field_design}
+CP2602 <- book %>% 
+  rename(accession_name = trt) %>% 
+mutate(
+    range = as.numeric(block),
+    row = rep(1:25, times = max(as.numeric(book$block))),
+    plot_number = (as.numeric(range) * 100) + row,
+    experiment = "CP2602",
+    plot_name = paste(experiment, plot_number, sep = "_"),
+    block = block)
+
+# creating the minicore_SL 
+SL_to_use <- CP_hvst %>% 
+  select(accession_name,
+         plot_name,
+         common_name,
+         `seed count`) %>% 
+  filter(!str_detect(plot_name, "GCP" )) %>% 
+  mutate(plot_name = paste0(plot_name, "_SL")) %>% 
+  rename(seedlot_name = plot_name)
+
+CP_INV <- read_csv("data/inventory_files/cowpea_inventory_2026.04.23.csv")
+
+# GRIN SL
+GRIN <- read_csv("data/inventory_files/cowpea_inventory_2026.04.23.csv") %>% 
+  filter(str_detect(population_name, "GRIN" )) %>% 
+  select(accession_name,
+         seedlot_name,
+         common_name)
+
+# commercial SL
+commercial <- read_csv("data/inventory_files/cowpea_inventory_2026.04.23.csv") %>% 
+  filter(
+    str_detect(population_name, "commercial"),
+    seedlot_name %in% c(
+      "KellySeedDillon_DixieLeaPea_2024",
+      "Hoss_TopPickPinkeyePea_2024",
+      "KellySeedDillon_CoronetPinkeyePurplehull_2024")) %>% 
+  select(accession_name,
+         seedlot_name,
+         common_name)
+
+SL_to_use <- SL_to_use %>% 
+  bind_rows(GRIN,commercial) %>% 
+  select(-`seed count`)
+
+
+CP2602_FBF <- CP2602 %>% 
+  left_join(SL_to_use, by = "accession_name") %>% 
+    mutate(
+    common_name = case_when(
+      str_detect(accession_name, "Check1") ~ "Iron Clay",
+      str_detect(accession_name, "Check2") ~ "Coronet Pinkeye Purplehull",
+      str_detect(accession_name, "Check3") ~ "Dixie Lee Pea",
+      TRUE ~ common_name)) %>% 
+  select(experiment,
+         plot_name,
+         accession_name,
+         common_name,
+         plot_number,
+         range,
+         row,
+         block,
+         seedlot_name
+         )
+
+### Checks
+#1. Coronet Pinkeye Purplehull
+#2. Top Pick Pinkeye Pea
+#3. Dixie Lee Pea
+
+CP2602_FBF <- CP2602_FBF %>% 
+  mutate(common_name = case_when(accession_name == "Check1" ~ "Coronet Pinkeye Purplehull",
+                                 accession_name == "Check2" ~ "Top Pick Pinkeye Pea",
+                                 accession_name == "Check3" ~ "Dixie Lee Pea",
+                                 TRUE ~ common_name),
+         seedlot_name = case_when(accession_name == "Check1" ~ "KellySeedDillon_CoronetPinkeyePurplehull_2024",
+                                 accession_name == "Check2" ~ "Hoss_TopPickPinkeyePea_2024",
+                                 accession_name == "Check3" ~ "KellySeedDillon_DixieLeaPea_2024",
+                                 TRUE ~ seedlot_name))
+
+
+# write.csv(CP2602_FBF, "~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/CP2602_FBF.csv", row.names = F)
+
+```
+
+
+```{r CP2602_field_map}
+
+CP2602_map <- CP2602_FBF %>% 
+  mutate(plots = case_when(
+    str_detect(accession_name, "Check") ~ accession_name,
+    TRUE ~ "Experimental"
+  )) %>% 
+  ggplot(aes(x = row, y = range, fill = plots)) + 
+  geom_tile(color = "black") + 
+  geom_text(aes(label = plot_number), size = 2, angle = 90, color = "black") +
+  theme_bw()+
+  scale_y_continuous(breaks = 1:13) +
+  scale_x_continuous(breaks = 1:25) +
+  labs(title = "CP2602 Field Layout", 
+       subtitle = "Augmented incomplete block design") +
+  theme(
+    legend.title = element_text(size = 8),
+    legend.text  = element_text(size = 6),
+    legend.key.size = unit(0.3, "cm"),
+    legend.spacing.y = unit(0.1, "cm")
+  )
+
+CP2602_map
+
+# ggsave(plot = CP2602_map, "~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/CP2602_field_map.png", width = 8, height = 6)
+```
+
