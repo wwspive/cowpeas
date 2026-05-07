@@ -177,7 +177,14 @@ CP2602_FBF <- CP2602_FBF %>%
                                  accession_name == "Check2" ~ "Hoss_TopPickPinkeyePea_2024",
                                  accession_name == "Check3" ~ "KellySeedDillon_DixieLeaPea_2024",
                                  TRUE ~ seedlot_name))
+# create a minicore id df
+mini_core_ID <- read_csv("data/CP2602_cowpea_diversity/CP2602_finalacc_list.csv") %>% 
+  select(accession_name,
+         `Minicore #`)
 
+# add the minicore id to the FBF 
+CP2602_FBF <- CP2602_FBF %>% 
+  left_join(mini_core_ID, by = "accession_name")
 
 # write.csv(CP2602_FBF, "~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/CP2602_FBF.csv", row.names = F)
 
