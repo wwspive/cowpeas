@@ -98,6 +98,8 @@ by(book,book[2],function(x) paste(x[,1],"-",as.character(x[,3])))
 
 
 ```{r CP2602_field_design}
+book <- read.table("data/CP2602_cowpea_diversity/2026_CP2602_DoE.txt", header = TRUE)
+
 CP2602 <- book %>% 
   rename(accession_name = trt) %>% 
 mutate(
@@ -132,16 +134,16 @@ commercial <- read_csv("data/inventory_files/cowpea_inventory_2026.04.23.csv") %
   filter(
     str_detect(population_name, "commercial"),
     seedlot_name %in% c(
-      "KellySeedDillon_DixieLeaPea_2024",
+      "KellySeedDillon_DixieLeaPea_2026",
       "Hoss_TopPickPinkeyePea_2024",
-      "KellySeedDillon_CoronetPinkeyePurplehull_2024")) %>% 
+      "KellySeedDillon_CoronetPinkeyePurplehull_2026")) %>% 
   select(accession_name,
          seedlot_name,
          common_name)
 
 SL_to_use <- SL_to_use %>% 
-  bind_rows(GRIN,commercial) %>% 
-  select(-`seed count`)
+  bind_rows(GRIN,commercial) 
+
 
 
 CP2602_FBF <- CP2602 %>% 
@@ -189,6 +191,37 @@ CP2602_FBF <- CP2602_FBF %>%
 # write.csv(CP2602_FBF, "~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/CP2602_FBF.csv", row.names = F)
 
 ```
+
+Change swap the genotypes in plots 708 and 808
+Change the name of the seedlots for the checks. 
+```{r}
+# read in the FBF 
+CP2602_FBF <- read_csv("data/CP2602_cowpea_diversity/CP2602_FBF.csv")
+
+CP2602_FBF_2 <- CP2602_FBF %>% 
+  mutate(seedlot_name = case_when(accession_name == "Check1" ~ "KellySeedDillon_CoronetPinkeyePurplehull_2026",
+                                 accession_name == "Check3" ~ "KellySeedDillon_DixieLeaPea_2026",
+                                 TRUE ~ seedlot_name),
+         accession_name = case_when(plot_number == "708" ~ "58-57",
+                                    plot_number == "808" ~ "IT98K-498-1",
+                                    TRUE ~ accession_name),
+         seedlot_name = case_when(plot_number == "708" ~ "GHC2501_142_SL",
+                                  plot_number == "808" ~ "GHC2501_197_SL",
+                                    TRUE ~ seedlot_name),
+         `Minicore #` = case_when(plot_number == "708" ~ "MinicoreUCR_005",
+                                  plot_number == "808" ~ "MinicoreUCR_072",
+                                    TRUE ~ `Minicore #`))
+         
+# write.csv(CP2602_FBF_2, "~/Documents/GitHub/cowpeas/data/CP2602_cowpea_diversity/CP2602_FBF.csv", row.names = F)
+
+
+#  original info        
+# 708 - IT98K-498-1 SL:GHC2501_197_SL miniID: MinicoreUCR_072
+# 808 - 58-57 SL: GHC2501_142_SL miniID: MinicoreUCR_005       
+         
+         
+```
+
 
 
 ```{r CP2602_field_map}
